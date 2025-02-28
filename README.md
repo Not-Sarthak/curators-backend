@@ -1,0 +1,2 @@
+-> Add apys to lst table and arrange in descending order
+-> user deposit -> get best lst -> comparision/algorithm -> swap
