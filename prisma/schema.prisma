@@ -94,7 +94,7 @@ model LstToken {
   protocolName       String        @map("protocol_name")
   protocolWebsite    String?       @map("protocol_website")
   
-  currentApy         Decimal?      @map("current_apy") @db.Decimal(6, 2)
+  currentApy         Decimal?      @map("current_apy") @db.Decimal(18, 9)
   currentPriceSol    Decimal?      @map("current_price_sol") @db.Decimal(18, 9)
   totalLiquiditySol  Decimal?      @map("total_liquidity_sol") @db.Decimal(18, 9)
   marketCapSol       Decimal?      @map("market_cap_sol") @db.Decimal(18, 9)
@@ -103,7 +103,10 @@ model LstToken {
   
   createdAt          DateTime      @default(now()) @map("created_at")
   updatedAt          DateTime      @updatedAt @map("updated_at")
-  
+
+  @@index([currentApy], name: "idx_lst_tokens_current_apy")
+
+  // Relations
   userHoldings       UserHolding[]
   withdrawals        Withdrawal[]
   transactions       Explorer[]
@@ -114,6 +117,7 @@ model LstToken {
 
   @@map("lst_tokens")
 }
+
 
 model UserHolding {
   id                  String    @id @default(uuid())

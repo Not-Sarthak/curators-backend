@@ -44,8 +44,8 @@ export interface SanctumLstMetadata {
 }
 
 export interface SanctumApyResponse {
-  apys: Record<string, number | null>;
-  avgApys: Record<string, number | null>;
+  apys: Record<string, number>;
+  errs: Record<string, string>;
 }
 
 export interface SanctumPriceResponse {

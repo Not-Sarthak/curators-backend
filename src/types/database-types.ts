@@ -5,7 +5,7 @@ export interface LstToken {
   symbol: string;
   imageUrl: string | null;
   decimals: number;
-  currentApy: number | null;
+  currentApy: any | null;
   currentPriceSol: number | null;
   totalLiquiditySol: number | null;
   marketCapSol: number | null;

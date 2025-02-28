@@ -5,10 +5,6 @@
 import { WithdrawalType } from '@prisma/client';
 
 /**
- * Authentication DTOs
- */
-
-/**
  * Deposit DTOs
  */
 export interface CreateDepositRequestDto {

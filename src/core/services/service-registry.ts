@@ -4,7 +4,7 @@ import { JupiterService } from './jupiter-service';
 import { ProfitabilityService } from './profitability-service';
 import { UserService } from './user-service';
 import { TransactionService } from './transaction-service';
-import { LstService } from './database-service';
+import { LstService } from './lst-service';
 import { AuthService } from './auth-service';
 import { SanctumService } from './sanctum-service';
 import prisma from '../../lib/prisma';

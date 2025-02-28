@@ -26,12 +26,7 @@ export const registerLstRoutes = (
     handler: async (_request: FastifyRequest, reply: FastifyReply) => {
       try {
         const lsts = await lstService.getAllLsts();
-
-        const formattedLsts = lsts.map((lst) => ({
-          ...lst,
-        }));
-
-        return reply.send(formattedLsts);
+        return reply.send(lsts);
       } catch (error) {
         console.error("Error fetching available LSTs:", error);
         return reply.status(500).send({ error: "Failed to fetch available LSTs" });
