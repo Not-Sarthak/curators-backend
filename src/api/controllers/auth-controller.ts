@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../core/services';
-import { SignInRequestDto, VerifyTokenRequestDto } from '../../types/dto-types';
+import { SignInRequestDto, VerifyTokenRequestDto } from '../../types/auth-types';
 
 /**
  * Authentication controller

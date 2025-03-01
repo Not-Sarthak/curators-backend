@@ -33,10 +33,7 @@ export class ServiceRegistry {
     this.sanctumService = new SanctumService();
     this.profitabilityService = new ProfitabilityService();
     this.userService = new UserService(this.sanctumService);
-    this.transactionService = new TransactionService(
-      prisma,
-      this.solanaService
-    );
+    this.transactionService = new TransactionService();
     this.lstService = new LstService();
     this.authService = new AuthService();
   }
@@ -120,12 +117,6 @@ export class ServiceRegistry {
     try {
       await prisma.$connect();
       console.log('Connected to the Database');
-
-      await this.lstService.syncLstData();
-      console.log('Initialized LST data');
-
-      this.lstService.scheduleRegularUpdates(60);
-      console.log('Scheduled regular LST data updates');
 
       console.log('All Services Initialized Successfully');
     } catch (error) {

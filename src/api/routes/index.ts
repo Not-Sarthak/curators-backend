@@ -5,8 +5,7 @@ import { registerUserRoutes } from './user-routes';
 import { registerLstRoutes } from './lst-routes';
 import { registerSwapRoutes } from './swap-routes';
 import { registerNetworkRoutes } from './network-routes';
-import { registerDepositRoutes } from './deposit-routes';
-import { registerWithdrawalRoutes } from './withdrawal-routes';
+import { registerTransactionRoutes } from './transaction-routes';
 
 /**
  * Register all API routes
@@ -23,7 +22,6 @@ export const registerRoutes = (
     registerLstRoutes(instance, serviceRegistry);
     registerSwapRoutes(instance, serviceRegistry);
     registerNetworkRoutes(instance, serviceRegistry);
-    registerDepositRoutes(instance, serviceRegistry);
-    registerWithdrawalRoutes(instance, serviceRegistry);
+    registerTransactionRoutes(instance, serviceRegistry);
   }, { prefix: '/api/v1' });
 }; 

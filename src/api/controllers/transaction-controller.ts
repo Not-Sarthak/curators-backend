@@ -17,7 +17,7 @@ export class TransactionController {
   }
 
   /**
-   * Creates a deposit
+   * Creates a deposit transaction
    * @param request The request
    * @param reply The reply
    */
@@ -28,50 +28,44 @@ export class TransactionController {
     try {
       const { walletAddress, amountSol, transactionHash } = request.body;
       
-      // Convert amountSol from string to number
       const amountSolNumber = Number(amountSol);
       if (isNaN(amountSolNumber)) {
         return reply.status(400).send({
           error: 'Bad Request',
-          message: 'Invalid amount provided',
+          message: 'Invalid Amount Provided',
         });
       }
       
-      // Check if the user is authorized to create a deposit for this wallet
       if (request.user?.walletAddress !== walletAddress) {
         return reply.status(403).send({
           error: 'Forbidden',
-          message: 'You are not authorized to create a deposit for this wallet',
+          message: 'You are Not Authorized to Create a Deposit for this Wallet',
         });
       }
       
-      // Get the transaction service
       const transactionService = this.serviceRegistry.getTransactionService();
       
-      // Create the deposit
-      const deposit = await transactionService.createDeposit(
+      const transaction = await transactionService.createDeposit(
         request.user.userId,
         walletAddress,
         amountSolNumber,
         transactionHash
       );
       
-      // Process the deposit
-      const processedDeposit = await transactionService.processDeposit(deposit.id);
+      const processedTransaction = await transactionService.processDeposit(transaction.id);
       
-      // Return the deposit
-      return reply.status(201).send(processedDeposit);
+      return reply.status(201).send(processedTransaction);
     } catch (error) {
-      console.error('Error creating deposit:', error);
+      console.error('Error Creating Deposit:', error);
       return reply.status(500).send({
         error: 'Internal Server Error',
-        message: error instanceof Error ? error.message : 'Failed to create deposit',
+        message: error instanceof Error ? error.message : 'Failed to Create Deposit',
       });
     }
   };
 
   /**
-   * Gets deposits for a user
+   * Gets deposit transactions for a user
    * @param request The request
    * @param reply The reply
    */
@@ -82,7 +76,6 @@ export class TransactionController {
     try {
       const { userId } = request.params;
       
-      // Check if the user is authorized to access these deposits
       if (request.user?.userId !== userId) {
         return reply.status(403).send({
           error: 'Forbidden',
@@ -90,17 +83,11 @@ export class TransactionController {
         });
       }
       
-      // Get the transaction service
       const transactionService = this.serviceRegistry.getTransactionService();
       
-      // Get the deposits
-      const deposits = await transactionService.getDepositsForUser(userId);
+      const result = await transactionService.getDepositsForUser(userId);
       
-      // Return the deposits
-      return reply.status(200).send({
-        userId,
-        deposits,
-      });
+      return reply.status(200).send(result);
     } catch (error) {
       console.error('Error getting deposits for user:', error);
       return reply.status(500).send({
@@ -111,7 +98,7 @@ export class TransactionController {
   };
 
   /**
-   * Creates a withdrawal
+   * Creates a withdrawal transaction
    * @param request The request
    * @param reply The reply
    */
@@ -122,7 +109,6 @@ export class TransactionController {
     try {
       const { walletAddress, requestedAmountSol, withdrawalType, lstMintAddress } = request.body;
       
-      // Check if the user is authorized to create a withdrawal for this wallet
       if (request.user?.walletAddress !== walletAddress) {
         return reply.status(403).send({
           error: 'Forbidden',
@@ -130,23 +116,27 @@ export class TransactionController {
         });
       }
       
-      // Get the transaction service
+      const amountSolNumber = Number(requestedAmountSol);
+      if (isNaN(amountSolNumber) || amountSolNumber <= 0) {
+        return reply.status(400).send({
+          error: 'Bad Request',
+          message: 'Invalid withdrawal amount provided',
+        });
+      }
+      
       const transactionService = this.serviceRegistry.getTransactionService();
       
-      // Create the withdrawal
-      const withdrawal = await transactionService.createWithdrawal(
+      const transaction = await transactionService.createWithdrawal(
         request.user.userId,
         walletAddress,
-        requestedAmountSol,
+        amountSolNumber,
         withdrawalType,
         lstMintAddress
       );
       
-      // Process the withdrawal
-      const processedWithdrawal = await transactionService.processWithdrawal(withdrawal.id);
+      const processedTransaction = await transactionService.processWithdrawal(transaction.id);
       
-      // Return the withdrawal
-      return reply.status(201).send(processedWithdrawal);
+      return reply.status(201).send(processedTransaction);
     } catch (error) {
       console.error('Error creating withdrawal:', error);
       return reply.status(500).send({
@@ -157,7 +147,7 @@ export class TransactionController {
   };
 
   /**
-   * Gets withdrawals for a user
+   * Gets withdrawal transactions for a user
    * @param request The request
    * @param reply The reply
    */
@@ -168,7 +158,6 @@ export class TransactionController {
     try {
       const { userId } = request.params;
       
-      // Check if the user is authorized to access these withdrawals
       if (request.user?.userId !== userId) {
         return reply.status(403).send({
           error: 'Forbidden',
@@ -176,22 +165,49 @@ export class TransactionController {
         });
       }
       
-      // Get the transaction service
       const transactionService = this.serviceRegistry.getTransactionService();
       
-      // Get the withdrawals
       const withdrawals = await transactionService.getWithdrawalsForUser(userId);
       
-      // Return the withdrawals
-      return reply.status(200).send({
-        userId,
-        withdrawals,
-      });
+      return reply.status(200).send(withdrawals);
     } catch (error) {
       console.error('Error getting withdrawals for user:', error);
       return reply.status(500).send({
         error: 'Internal Server Error',
         message: error instanceof Error ? error.message : 'Failed to get withdrawals for user',
+      });
+    }
+  };
+
+  /**
+   * Gets all transactions for a user
+   * @param request The request
+   * @param reply The reply
+   */
+  public getTransactionsForUser = async (
+    request: FastifyRequest<{ Params: { userId: string } }>,
+    reply: FastifyReply
+  ) => {
+    try {
+      const { userId } = request.params;
+      
+      if (request.user?.userId !== userId) {
+        return reply.status(403).send({
+          error: 'Forbidden',
+          message: 'You are not authorized to access these transactions',
+        });
+      }
+      
+      const transactionService = this.serviceRegistry.getTransactionService();
+      
+      const result = await transactionService.getTransactionsForUser(userId);
+      
+      return reply.status(200).send(result);
+    } catch (error) {
+      console.error('Error getting transactions for user:', error);
+      return reply.status(500).send({
+        error: 'Internal Server Error',
+        message: error instanceof Error ? error.message : 'Failed to get transactions for user',
       });
     }
   };

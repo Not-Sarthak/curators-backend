@@ -2,10 +2,10 @@
  * DTO (Data Transfer Object) type definitions for API endpoints
  */
 
-import { WithdrawalType } from '@prisma/client';
+import { TransactionType, WithdrawalType } from '@prisma/client';
 
 /**
- * Deposit DTOs
+ * Transaction DTOs
  */
 export interface CreateDepositRequestDto {
   walletAddress: string;
@@ -13,24 +13,6 @@ export interface CreateDepositRequestDto {
   transactionHash?: string;
 }
 
-export interface DepositResponseDto {
-  id: string;
-  userId: string;
-  walletAddress: string;
-  amountSol: string;
-  status: string;
-  transactionHash?: string;
-  createdAt: string;
-}
-
-export interface GetDepositsResponseDto {
-  deposits: DepositResponseDto[];
-  total: number;
-}
-
-/**
- * Withdrawal DTOs
- */
 export interface CreateWithdrawalRequestDto {
   walletAddress: string;
   requestedAmountSol: string;
@@ -38,20 +20,39 @@ export interface CreateWithdrawalRequestDto {
   lstMintAddress?: string;
 }
 
-export interface WithdrawalResponseDto {
+export interface TransactionResponseDto {
   id: string;
   userId: string;
+  transactionType: TransactionType;
   walletAddress: string;
-  requestedAmountSol: string;
-  actualAmountSol?: string;
+  amountSol: string;
   status: string;
-  withdrawalType: WithdrawalType;
+  transactionHash?: string;
+  
+  // Withdrawal specific fields
+  actualAmountSol?: string;
+  withdrawalType?: WithdrawalType;
+  
+  // LST related fields
   lstMintAddress?: string;
   lstAmount?: string;
+  conversionPriceSol?: string;
+  
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetTransactionsResponseDto {
+  userId: string;
+  transactions: TransactionResponseDto[];
+}
+
+export interface GetDepositsResponseDto {
+  userId: string;
+  deposits: TransactionResponseDto[];
 }
 
 export interface GetWithdrawalsResponseDto {
-  withdrawals: WithdrawalResponseDto[];
-  total: number;
+  userId: string;
+  withdrawals: TransactionResponseDto[];
 }

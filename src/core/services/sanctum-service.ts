@@ -2,7 +2,7 @@ import { fetchAllLsts } from "../../modules/sanctum-module/get-all-lsts";
 import { fetchLstMetadata } from "../../modules/sanctum-module/get-lst-meta";
 import { fetchLatestApy } from "../../modules/sanctum-module/get-latest-apy";
 import { fetchLstPriceInSol } from "../../modules/sanctum-module/get-lst-sol-price";
-import { SanctumLstMetadata, SanctumLst, SanctumPriceResponse, InceptionApyResponse } from "../../types/api-types";
+import { SanctumLstMetadata, SanctumLst, SanctumPriceResponse, InceptionApyResponse, SanctumApyResponse } from "../../types/api-types";
 import { fetchInceptionApy } from "../../modules/sanctum-module/get-inception-apy";
 
 export class SanctumService {
@@ -14,7 +14,7 @@ export class SanctumService {
     return fetchLstMetadata(symbols);
   }
 
-  public async getLatestApy(symbols: string[]): Promise<Record<string, number>> {
+  public async getLatestApy(symbols: string[]): Promise<SanctumApyResponse> {
     return fetchLatestApy(symbols);
   }
 

@@ -39,6 +39,8 @@ enum TransactionType {
 
 enum TransactionStatus {
   PENDING
+  PROCESSING
+  COMPLETED
   CONFIRMED
   FAILED
 }
@@ -77,10 +79,9 @@ model User {
   updatedAt            DateTime      @updatedAt @map("updated_at")
   
   holdings             UserHolding[]
-  deposits             Deposit[]
-  withdrawals          Withdrawal[]
+  transactions         Transaction[]
   swaps                Swap[]
-  transactions         Explorer[]
+  explorerRecords      Explorer[]
   epochProfits         EpochProfit[]
 
   @@map("users")
@@ -108,8 +109,8 @@ model LstToken {
 
   // Relations
   userHoldings       UserHolding[]
-  withdrawals        Withdrawal[]
-  transactions       Explorer[]
+  transactions       Transaction[]
+  explorerRecords    Explorer[]
   bestPerforming     EpochProfit[] @relation("BestPerformingLst")
   worstPerforming    EpochProfit[] @relation("WorstPerformingLst")
   sourceSwaps        Swap[]        @relation("SourceLst")
@@ -139,62 +140,43 @@ model UserHolding {
   @@map("user_holdings")
 }
 
-model Deposit {
-  id                String        @id @default(uuid())
-  userId            String        @map("user_id")
-  
-  transactionHash   String?       @unique @map("transaction_hash")
-  walletAddress     String        @map("wallet_address")
-  
-  amountSol         Decimal       @map("amount_sol") @db.Decimal(18, 9)
-  networkFeeSol     Decimal?      @map("network_fee_sol") @db.Decimal(18, 9)
-  
-  status            DepositStatus @default(PENDING)
-  errorMessage      String?       @map("error_message")
-  confirmationCount Int           @default(0) @map("confirmation_count")
-  
-  createdAt         DateTime      @default(now()) @map("created_at")
-  updatedAt         DateTime      @updatedAt @map("updated_at")
-  
-  // Relations
-  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions      Explorer[]
-
-  @@map("deposits")
-}
-
-model Withdrawal {
+model Transaction {
   id                  String           @id @default(uuid())
   userId              String           @map("user_id")
   
+  transactionType     TransactionType
   transactionHash     String?          @unique @map("transaction_hash")
   walletAddress       String           @map("wallet_address")
   
-  requestedAmountSol  Decimal          @map("requested_amount_sol") @db.Decimal(18, 9)
-  actualAmountSol     Decimal?         @map("actual_amount_sol") @db.Decimal(18, 9)
+  amountSol           Decimal          @map("amount_sol") @db.Decimal(18, 9)
   networkFeeSol       Decimal?         @map("network_fee_sol") @db.Decimal(18, 9)
-  conversionFeeSol    Decimal?         @map("conversion_fee_sol") @db.Decimal(18, 9)
   
-  withdrawalType      WithdrawalType
+  actualAmountSol     Decimal?         @map("actual_amount_sol") @db.Decimal(18, 9)
+  conversionFeeSol    Decimal?         @map("conversion_fee_sol") @db.Decimal(18, 9)
+  withdrawalType      WithdrawalType?
+  
   lstMintAddress      String?          @map("lst_mint_address")
   lstAmount           Decimal?         @map("lst_amount") @db.Decimal(18, 9)
   conversionPriceSol  Decimal?         @map("conversion_price_sol") @db.Decimal(18, 9)
   
-  status              WithdrawalStatus @default(PENDING)
+  status              TransactionStatus @default(PENDING)
   errorMessage        String?          @map("error_message")
+  confirmationCount   Int              @default(0) @map("confirmation_count")
   retryCount          Int              @default(0) @map("retry_count")
   
   createdAt           DateTime         @default(now()) @map("created_at")
   updatedAt           DateTime         @updatedAt @map("updated_at")
   
+  // Relations
   user                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   lstToken            LstToken?        @relation(fields: [lstMintAddress], references: [mintAddress])
-  transactions        Explorer[]
+  explorerRecords     Explorer[]
 
-  @@index([userId, status], name: "idx_withdrawals_user_status")
-  @@index([transactionHash], name: "idx_withdrawals_hash")
-  @@index([createdAt], name: "idx_withdrawals_created")
-  @@map("withdrawals")
+  @@index([userId, status], name: "idx_transactions_user_status")
+  @@index([transactionHash], name: "idx_transactions_hash")
+  @@index([createdAt], name: "idx_transactions_created")
+  @@index([transactionType], name: "idx_transactions_type")
+  @@map("transactions")
 }
 
 model Explorer {
@@ -204,9 +186,8 @@ model Explorer {
   transactionType         TransactionType
   transactionHash         String?           @unique @map("transaction_hash")
   
-  depositId              String?            @map("deposit_id")
-  withdrawalId           String?            @map("withdrawal_id")
-  swapId                 String?            @map("swap_id")
+  transactionId           String?           @map("transaction_id")
+  swapId                  String?           @map("swap_id")
   
   amountSol               Decimal           @map("amount_sol") @db.Decimal(18, 9)
   feeSol                  Decimal           @map("fee_sol") @db.Decimal(18, 9)
@@ -232,8 +213,7 @@ model Explorer {
   // Relations
   user                    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   lstToken                LstToken?         @relation(fields: [lstMintAddress], references: [mintAddress])
-  deposit                 Deposit?          @relation(fields: [depositId], references: [id])
-  withdrawal              Withdrawal?       @relation(fields: [withdrawalId], references: [id])
+  transaction             Transaction?      @relation(fields: [transactionId], references: [id])
   swap                    Swap?             @relation(fields: [swapId], references: [id])
 
   @@map("explorer")
