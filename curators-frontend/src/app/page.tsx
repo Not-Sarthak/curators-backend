@@ -55,10 +55,10 @@ export default function Home() {
         </div>
         <div className="text-center text-[#0A342A] md:text-white text-[20px] md:text-[28px] font-normal leading-[29.40px] [text-shadow:_-6px_11px_11px_rgb(4_18_21_/_0.50)]">
           <span className="md:hidden">
-            your SOL money's<br />Lifelong Secret Teammate
+            your SOL money&apos;s<br />Lifelong Secret Teammate
           </span>
           <span className="hidden md:inline">
-            your SOL money's Lifelong Secret Teammate
+            your SOL money&apos;s Lifelong Secret Teammate
           </span>
         </div>
         <div className="pt-4">
