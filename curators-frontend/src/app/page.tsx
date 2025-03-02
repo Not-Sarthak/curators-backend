@@ -6,6 +6,7 @@ import { Rubik_Puddles } from "next/font/google";
 import { useEffect, useState } from "react";
 import { animationKeyframes, cloudAnimations } from "@/styles/animations";
 import { InvestButton } from "@/components/buttons/buttons";
+import { Loading } from "@/components/loading/loading";
 
 const rubikPuddles = Rubik_Puddles({
   weight: "400",
@@ -15,6 +16,8 @@ const rubikPuddles = Rubik_Puddles({
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -27,8 +30,32 @@ export default function Home() {
 
     window.addEventListener("resize", checkScreenSize);
 
-    return () => window.removeEventListener('resize', checkScreenSize);
+    const progressInterval = setInterval(() => {
+      setLoadingProgress(prev => {
+        const newProgress = prev + Math.random() * 15;
+        return newProgress >= 100 ? 100 : newProgress;
+      });
+    }, 200);
+
+    const loadingTimer = setTimeout(() => {
+      clearInterval(progressInterval);
+      setLoadingProgress(100);
+      
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+    }, 2000);
+
+    return () => {
+      clearTimeout(loadingTimer);
+      clearInterval(progressInterval);
+      window.removeEventListener('resize', checkScreenSize);
+    };
   }, []);
+
+  if (isLoading) {
+    return <Loading loadingProgress={loadingProgress} />;
+  }
 
   return (
     <>

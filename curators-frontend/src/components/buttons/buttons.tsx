@@ -29,9 +29,9 @@ export const InvestButton: React.FC<InvestButtonProps> = ({
         <path
           d="M9.5 18C11.6808 16.423 13.6364 14.5771 15.3172 12.5101C15.5609 12.2103 15.5609 11.7897 15.3172 11.4899C13.6364 9.42294 11.6808 7.57701 9.5 6"
           stroke="#0A342A"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
       </svg>
     </button>
