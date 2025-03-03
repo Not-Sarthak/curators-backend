@@ -7,6 +7,8 @@ import { LstService } from './lst-service';
 import { AuthService } from './auth-service';
 import { SanctumService } from './sanctum-service';
 import prisma from '../../lib/prisma';
+import { Keypair } from '@solana/web3.js';
+import { parseSolanaPrivateKey } from '../../lib/utils';
 
 /**
  * Registry for all services
@@ -19,11 +21,12 @@ export class ServiceRegistry {
   private readonly transactionService: TransactionService;
   private readonly lstService: LstService;
   private readonly authService: AuthService;
+  private readonly walletKeypair: Keypair;
+
   /**
    * Creates a new ServiceRegistry instance
    */
   constructor() {
-
     // Initialize services
     this.solanaService = new SolanaService();
     this.sanctumService = new SanctumService();
@@ -32,6 +35,18 @@ export class ServiceRegistry {
     this.transactionService = new TransactionService();
     this.lstService = new LstService();
     this.authService = new AuthService();
+
+    const privateKeyString = process.env.SOLANA_WALLET_PRIVATE_KEY;
+    if (!privateKeyString) {
+      throw new Error('SOLANA_WALLET_PRIVATE_KEY environment variable is not set');
+    }
+
+    const privateKey = parseSolanaPrivateKey(privateKeyString);
+    if (!privateKey) {
+      throw new Error('Invalid wallet private key format');
+    }
+
+    this.walletKeypair = Keypair.fromSecretKey(privateKey);
   }
 
   /**
@@ -96,6 +111,10 @@ export class ServiceRegistry {
    */
   public getAuthService(): AuthService {
     return this.authService;
+  }
+
+  public getWalletKeypair(): Keypair {
+    return this.walletKeypair;
   }
 
   /**
