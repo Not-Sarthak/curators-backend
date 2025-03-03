@@ -1,20 +1,11 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { ServiceRegistry } from '../../core/services';
+import { getNetwork } from '../../modules/solana-module/get-network';
+import { NetworkDetails } from '../../types/solana-types';
 
 /**
  * Network controller
  */
 export class NetworkController {
-  private readonly serviceRegistry: ServiceRegistry;
-
-  /**
-   * Creates a new NetworkController instance
-   * @param serviceRegistry The service registry
-   */
-  constructor(serviceRegistry: ServiceRegistry) {
-    this.serviceRegistry = serviceRegistry;
-  }
-
   /**
    * Gets network details
    * @param request The request
@@ -23,57 +14,51 @@ export class NetworkController {
   public getNetworkDetails = async (
     request: FastifyRequest,
     reply: FastifyReply
-  ): Promise<void> => {
+  ): Promise<NetworkDetails> => {
     try {
-      console.log('NetworkController: Starting getNetworkDetails');
+      const networkDetails = await getNetwork();
+      console.log('Network Details:', JSON.stringify(networkDetails, null, 2));
       
-      // Get the network service
-      const networkService = this.serviceRegistry.getNetworkService();
-      console.log('NetworkController: Got NetworkService');
-      
-      // Get network details
-      console.log('NetworkController: Fetching network details...');
-      const networkDetails = await networkService.getNetworkDetails();
-      console.log('NetworkController: Network details received:', JSON.stringify(networkDetails));
-      
-      // Return the network details
-      console.log('NetworkController: Sending response...');
-      reply.status(200).send(networkDetails);
-      console.log('NetworkController: Response sent');
+      // Validate that we have all required fields
+      if (!this.isValidNetworkDetails(networkDetails)) {
+        throw new Error('Invalid network details response structure');
+      }
+
+      return networkDetails;
     } catch (error) {
       console.error('NetworkController: Error getting network details:', error);
-      reply.status(500).send({
-        error: 'Internal Server Error',
-        message: error instanceof Error ? error.message : 'Failed to get network details',
-      });
+      throw error;
     }
   };
 
-  /**
-   * Gets the health status of the system
-   * @param request The request
-   * @param reply The reply
-   */
-  public getHealthStatus = async (
-    request: FastifyRequest,
-    reply: FastifyReply
-  ) => {
-    try {
-      // Get the network service
-      const networkService = this.serviceRegistry.getNetworkService();
-      
-      // Get the health status
-      const healthStatus = await networkService.getHealthStatus();
-      
-      // Return the health status with the appropriate status code
-      const statusCode = healthStatus.status === 'healthy' ? 200 : 503;
-      return reply.status(statusCode).send(healthStatus);
-    } catch (error) {
-      console.error('Error getting health status:', error);
-      return reply.status(500).send({
-        error: 'Internal Server Error',
-        message: error instanceof Error ? error.message : 'Failed to get health status',
-      });
-    }
-  };
-} 
+  private isValidNetworkDetails(data: any): data is NetworkDetails {
+    return (
+      data &&
+      typeof data === 'object' &&
+      typeof data.version === 'string' &&
+      typeof data.cluster === 'string' &&
+      data.epochInfo &&
+      typeof data.epochInfo === 'object' &&
+      data.epochInfo.current &&
+      typeof data.epochInfo.current === 'object' &&
+      typeof data.epochInfo.progress === 'number' &&
+      typeof data.epochInfo.timeRemaining === 'string' &&
+      data.inflation &&
+      typeof data.inflation === 'object' &&
+      data.inflation.current &&
+      typeof data.inflation.current === 'object' &&
+      typeof data.inflation.baseSolStakingApy === 'number' &&
+      data.stats &&
+      typeof data.stats === 'object' &&
+      data.supply &&
+      typeof data.supply === 'object' &&
+      data.performance &&
+      typeof data.performance === 'object' &&
+      data.health &&
+      typeof data.health === 'object' &&
+      typeof data.health.status === 'string' &&
+      ['healthy', 'degraded', 'down'].includes(data.health.status) &&
+      typeof data.health.lastUpdated === 'string'
+    );
+  }
+}

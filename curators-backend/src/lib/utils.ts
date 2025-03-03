@@ -54,3 +54,12 @@ export const parseSolanaPrivateKey = (key: string | undefined): Uint8Array | nul
     process.exit(1);
   }
 };
+
+export default function encodeBase64Bytes(bytes: any) {
+  return btoa(
+    bytes.reduce(
+      (acc: any, current: any) => acc + String.fromCharCode(current),
+      '',
+    ),
+  );
+}

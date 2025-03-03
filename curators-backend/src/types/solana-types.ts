@@ -16,11 +16,24 @@ export interface ComputedEpochData {
 }
 
 export interface NetworkDetails {
-  epochInfo: EpochInfo;
-  inflationRate: InflationRate;
-  epochProgress: number;
-  timeRemainingInEpoch: string;
-  baseSolStakingApy: number;
+  version: string;
+  cluster: string;
+  epochInfo: {
+    current: EpochInfo;
+    progress: number;
+    timeRemaining: string;
+  };
+  inflation: {
+    current: InflationRate;
+    baseSolStakingApy: number;
+  };
+  stats: ClusterStats;
+  supply: SupplyInfo;
+  performance: NetworkPerformance;
+  health: {
+    status: 'healthy' | 'degraded' | 'down';
+    lastUpdated: string;
+  };
 }
 
 export interface InflationRate {
@@ -28,6 +41,28 @@ export interface InflationRate {
   validator: number;
   foundation: number;
   epoch: number;
+}
+
+export interface ClusterStats {
+  currentSlot: number;
+  transactionCount: number;
+  validatorCount: number;
+  clusterTime: number;
+  averageBlockTime: number;
+}
+
+export interface SupplyInfo {
+  total: number;
+  circulating: number;
+  nonCirculating: number;
+  maxSupply: number | null;
+}
+
+export interface NetworkPerformance {
+  averageSlotTime: number;
+  currentTps: number;
+  maxTps: number;
+  averageTps: number;
 }
 
 export interface RpcResponse<T> {

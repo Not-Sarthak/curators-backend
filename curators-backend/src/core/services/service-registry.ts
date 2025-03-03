@@ -21,7 +21,6 @@ export class ServiceRegistry {
   private readonly transactionService: TransactionService;
   private readonly lstService: LstService;
   private readonly authService: AuthService;
-
   /**
    * Creates a new ServiceRegistry instance
    */

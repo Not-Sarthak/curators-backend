@@ -1,36 +1,63 @@
-import axios from "axios";
-import { JupiterSwapQuote, JupiterSwapTransaction, JupiterSwapRequest } from "../../types";
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { JupiterSwapQuote } from '../../types';
+const GLOBAL_SLIPPAGE_BPS = 10_000;
+const JUPITER_ENDPOINT = 'https://quote-api.jup.ag/v6';
 
-const JUPITER_API_BASE_URL = process.env.JUPITER_API_BASE_URL || "https://quote-api.jup.ag/v6";
+export async function getJupiterQuote(params: {
+  fromToken: string;
+  toToken: string;
+  amount: number;
+}): Promise<JupiterSwapQuote> {
+  const amount = params.amount * LAMPORTS_PER_SOL;
+  const slippageBps = GLOBAL_SLIPPAGE_BPS;
+  const response = await fetch(
+    `${JUPITER_ENDPOINT}/quote?inputMint=${params.fromToken}&outputMint=${params.toToken}&amount=${amount}&slippageBps=${slippageBps}`
+  );
 
-/**
- * Fetches a swap transaction from Jupiter API.
- */
-export async function getSwapTransaction(
-  quoteResponse: JupiterSwapQuote,
+  const data = await response.json();
+  console.log('Jupiter Quote::', data);
+  return data as JupiterSwapQuote;
+}
+
+export async function getSwapTxn(
+  inputMint: string,
+  outputMint: string,
+  amount: number,
   userPublicKey: string
-): Promise<JupiterSwapTransaction> {
-  try {
-    const swapRequest: JupiterSwapRequest = {
-      quoteResponse,
-      userPublicKey,
-      dynamicComputeUnitLimit: true,
-      dynamicSlippage: { maxBps: 300 },
-      prioritizationFeeLamports: {
-        priorityLevelWithMaxLamports: {
-          maxLamports: 1_000_000,
-          priorityLevel: "veryHigh",
-        },
+) {
+  const quoteResponse = await getJupiterQuote({
+    fromToken: inputMint,
+    toToken: outputMint,
+    amount,
+  });
+
+  console.log('Quote Response Inside getSwapTxn: ', quoteResponse);
+  console.log('Input Mint Inside getSwapTxn: ', inputMint);
+  console.log('Output Mint Inside getSwapTxn: ', outputMint);
+  console.log('Amount Inside getSwapTxn: ', amount);
+
+  const swapObj: any = await (
+    await fetch('https://quote-api.jup.ag/v6/swap', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    };
+      body: JSON.stringify({
+        quoteResponse,
+        userPublicKey,
+        dynamicComputeUnitLimit: true,
+        dynamicSlippage: { maxBps: GLOBAL_SLIPPAGE_BPS },
+      }),
+    })
+  ).json();
 
-    const response = await axios.post<JupiterSwapTransaction>(`${JUPITER_API_BASE_URL}/swap`, swapRequest, {
-      headers: { "Content-Type": "application/json" },
-    });
+  console.log('Jupiter Swap Transaction:', swapObj);
 
-    return response.data;
-  } catch (error: any) {
-    console.error("Error fetching swap transaction from Jupiter:", error.response?.data || error.message);
-    throw new Error("Failed to fetch swap transaction from Jupiter API");
-  }
+  const outAmount = quoteResponse.outAmount;
+  console.log('Out Amount Inside getSwapTxn: ', outAmount);
+
+  return {
+    swapObj,
+    outAmount,
+  };
 }

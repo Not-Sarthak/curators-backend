@@ -63,27 +63,32 @@ export interface InceptionApyResponse {
 }
 
 // Jupiter Types
-
 export interface JupiterSwapQuote {
   inputMint: string;
-  inAmount: string;
+  inAmount: number;
   outputMint: string;
-  outAmount: string;
-  otherAmountThreshold: string;
+  outAmount: number;
+  otherAmountThreshold: number;
   swapMode: "ExactIn" | "ExactOut";
   slippageBps: number;
   platformFee: any | null;
-  priceImpactPct: string;
+  priceImpactPct: number;
   routePlan: JupiterRoutePlan[];
-  scoreReport: any | null;
   contextSlot: number;
   timeTaken: number;
-  swapUsdValue: string;
-  simplerRouteUsed: boolean;
 }
 
 export interface JupiterRoutePlan {
-  swapInfo: any;
+  swapInfo: {
+    ammKey: string;
+    label: string;
+    inputMint: string;
+    outputMint: string;
+    inAmount: string;
+    outAmount: string;
+    feeAmount: string;
+    feeMint: string;
+  };
   percent: number;
 }
 
@@ -94,12 +99,5 @@ export interface JupiterSwapTransaction {
 export interface JupiterSwapRequest {
   quoteResponse: JupiterSwapQuote;
   userPublicKey: string;
-  dynamicComputeUnitLimit: boolean;
-  dynamicSlippage: { maxBps: number };
-  prioritizationFeeLamports: {
-    priorityLevelWithMaxLamports: {
-      maxLamports: number;
-      priorityLevel: "veryHigh" | "high" | "medium" | "low";
-    };
-  };
+  wrapUnwrapSOL: boolean;
 }

@@ -1,0 +1,1 @@
+const serviceRegistry = new ServiceRegistry('https://api.mainnet-beta.solana.com'); // or your preferred RPC endpoint 
