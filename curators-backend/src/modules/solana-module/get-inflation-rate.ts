@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { InflationRate, RpcResponse } from '../../types';
-import { solanaConnection } from '../../lib/solana';
+import { connection } from '../../config';
 
 /**
  * Fetches the current inflation rate from the Solana blockchain
@@ -11,7 +11,7 @@ export const getInflationRate = async (): Promise<InflationRate> => {
     console.log('SolanaService: Fetching inflation rate...');
 
     const response = await axios.post<RpcResponse<InflationRate>>(
-      solanaConnection.rpcEndpoint,
+      connection.rpcEndpoint,
       {
         jsonrpc: '2.0',
         id: 1,

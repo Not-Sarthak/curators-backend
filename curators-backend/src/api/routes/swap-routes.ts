@@ -29,7 +29,10 @@ export const registerSwapRoutes = (
   });
 
   fastify.get('/swaps/routes', {
+    onRequest: [authMiddleware],
     schema: swapRoutesSchema,
-    handler: swapController.getAvailableRoutes,
+    handler: async (_, reply) => {
+      return swapController.getAvailableRoutes(reply);
+    }
   });
 }; 

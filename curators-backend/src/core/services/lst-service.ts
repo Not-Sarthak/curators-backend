@@ -114,4 +114,27 @@ export class LstService {
       );
     }
   }
+
+  /**
+   * Gets the LST with the highest current APY
+   * @returns The LST token with highest APY or null if none found
+   */
+  public async getHighestApyLst(): Promise<LstToken | null> {
+    try {
+      const lst = await prisma.lstToken.findFirst({
+        where: {
+          currentApy: { not: null }
+        },
+        orderBy: {
+          currentApy: 'desc'
+        }
+      });
+
+      return lst ? JSON.parse(JSON.stringify(lst)) : null;
+    } catch (error) {
+      throw new Error(
+        `Failed to get highest APY LST: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
 }

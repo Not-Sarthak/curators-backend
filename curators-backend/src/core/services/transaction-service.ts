@@ -5,7 +5,8 @@ import { processWithdrawal } from '../../modules/database-module/transfers/proce
 import { getDepositsForUser } from '../../modules/database-module/transfers/get-user-deposits';
 import { getWithdrawalsForUser } from '../../modules/database-module/transfers/get-user-withdrawals';
 import { getTransactionsForUser } from '../../modules/database-module/transfers/get-user-transactions';
-import { WithdrawalType } from '@prisma/client';
+import { WithdrawalType, TransactionStatus } from '@prisma/client';
+import prisma from '../../lib/prisma';
 /**
  * Service for managing transactions (deposits and withdrawals)
  */
@@ -63,5 +64,30 @@ export class TransactionService {
    */
   public async getTransactionsForUser(userId: string) {
     return await getTransactionsForUser(userId);
+  }
+
+  /**
+   * Updates a deposit transaction with swap details
+   * @param transactionId The deposit transaction ID
+   * @param swapTxHash The swap transaction hash
+   * @param lstMintAddress The LST mint address
+   * @param usedMevProtection Whether MEV protection was used
+   */
+  public async updateDepositWithSwap(
+    transactionId: string,
+    swapTxHash: string,
+    lstMintAddress: string,
+    usedMevProtection: boolean
+  ) {
+    return await prisma.transaction.update({
+      where: { id: transactionId },
+      data: {
+        status: TransactionStatus.COMPLETED,
+        confirmationCount: 32,
+        lstMintAddress,
+        swapTransactionHash: swapTxHash,
+        usedMevProtection,
+      },
+    });
   }
 }

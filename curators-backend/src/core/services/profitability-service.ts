@@ -33,12 +33,10 @@ export class ProfitabilityService {
       };
     }
 
-    // Calculate expected yields
     const currentYield = this.calculateExpectedYield(amount, currentLstApy, epochInfo);
     const newYield = this.calculateExpectedYield(amount, newLstApy, epochInfo);
     const yieldImprovement = newYield - currentYield;
 
-    // Check if the yield improvement covers the swap fees
     if (yieldImprovement <= swapFees) {
       return {
         isProfitable: false,
@@ -47,11 +45,9 @@ export class ProfitabilityService {
       };
     }
 
-    // Calculate the yearly yield improvement
-    const epochsPerYear = 365 * 0.5; // Approximately 2 days per epoch
+    const epochsPerYear = 365 * 0.5; 
     const yearlyYieldImprovement = yieldImprovement * epochsPerYear;
 
-    // Check if the fees are less than the maximum allowed percentage of yearly yield improvement
     if (swapFees / yearlyYieldImprovement > this.MAX_FEE_TO_YIELD_RATIO) {
       return {
         isProfitable: false,
@@ -60,7 +56,6 @@ export class ProfitabilityService {
       };
     }
 
-    // Calculate the expected profit (yield improvement minus swap fees)
     const expectedProfit = yieldImprovement - swapFees;
 
     return {

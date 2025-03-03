@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { Connection, Keypair, LAMPORTS_PER_SOL, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { Keypair, LAMPORTS_PER_SOL, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
 import { getSwapQuote } from '../../modules/jupiter-module/get-swap-quote';
-import { getSwapTxn } from '../../modules/jupiter-module/get-swap-transaction';
+import { executeSwapWithMevProtection } from '../../modules/jupiter-module/execute-swap';
 import { deserializeTransaction } from '../../modules/jupiter-module/deserialize-transaction';
 import encodeBase64Bytes from '../../lib/utils';
 import { signTransaction } from '../../modules/jupiter-module/sign-transaction';
@@ -90,7 +90,7 @@ export class SwapController {
   };
 
   /**
-   * Executes a swap
+   * Executes a swap with MEV protection when possible
    * @param request The request
    * @param reply The reply
    */
@@ -101,16 +101,13 @@ export class SwapController {
         inputMint: string;
         outputMint: string;
         amount: string;
-        route?: string;
-        slippageBps?: number;
+        maxJitoSlotDistance?: number;
       };
     }>,
     reply: FastifyReply
   ) => {
     try {
-      const { userId, inputMint, outputMint, amount } = request.body;
-
-      console.log('Amount: ', amount);
+      const { userId, inputMint, outputMint, amount, maxJitoSlotDistance } = request.body;
 
       if (request.user?.userId !== userId) {
         return reply.status(403).send({
@@ -119,54 +116,21 @@ export class SwapController {
         });
       }
 
-      const { swapObj, outAmount } = await getSwapTxn(
+      const result = await executeSwapWithMevProtection(
         inputMint,
         outputMint,
         Number(amount),
-        this.walletKeypair.publicKey.toString()
-      );
-
-      console.log('Out Amount: ', outAmount);
-
-      const { tx, addressLookupTableAccounts } = await deserializeTransaction(
-        swapObj.swapTransaction
-      );
-
-      const message = TransactionMessage.decompile(tx.message, {
-        addressLookupTableAccounts,
-      });
-
-      const transaction = new VersionedTransaction(
-        message.compileToV0Message(addressLookupTableAccounts)
-      );
-
-      console.log(encodeBase64Bytes(transaction.serialize()));
-
-      const signedTransaction = await signTransaction(
-        transaction,
         this.walletKeypair,
-        0.001 *  LAMPORTS_PER_SOL,
+        maxJitoSlotDistance
       );
-
-      console.log("After Signing: ",encodeBase64Bytes(signedTransaction.serialize()));
-
-      const txHash = await connection.sendTransaction(signedTransaction);
-      console.log('Transaction Hash: ', txHash);
-
-      if (!swapObj) {
-        return reply.status(500).send({
-          error: 'Internal Server Error',
-          message: 'Failed to Fetch Swap Transaction',
-        });
-      }
 
       return reply.status(200).send({
-        swapObj,
-        outAmount,
+        transactionHash: result.txHash,
+        usedMevProtection: result.usedMevProtection,
         status: 'success',
       });
     } catch (error) {
-      console.error('Error Executing Swap:', error);
+      console.error('Error executing swap:', error);
 
       if (error instanceof Error && error.message.includes('not found')) {
         return reply.status(404).send({
@@ -184,7 +148,7 @@ export class SwapController {
 
       return reply.status(500).send({
         error: 'Internal Server Error',
-        message: error instanceof Error ? error.message : 'Failed to Execute Swap',
+        message: error instanceof Error ? error.message : 'Failed to execute swap',
       });
     }
   };
@@ -194,14 +158,13 @@ export class SwapController {
    * @param request The request
    * @param reply The reply
    */
-  public getAvailableRoutes = async (request: FastifyRequest, reply: FastifyReply) => {
+  public getAvailableRoutes = async (reply: FastifyReply) => {
     try {
       return reply.status(200).send({
-        routes: ['JUPITER'],
+        routes: ['JUPITER_WITH_MEV_PROTECTION'],
       });
     } catch (error) {
       console.error('Error getting available routes:', error);
-
       return reply.status(500).send({
         error: 'Internal Server Error',
         message: error instanceof Error ? error.message : 'Failed to get available routes',

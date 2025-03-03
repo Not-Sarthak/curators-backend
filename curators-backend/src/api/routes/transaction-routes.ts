@@ -27,7 +27,6 @@ export const registerTransactionRoutes = (
   const transactionController = new TransactionController(serviceRegistry);
   const authMiddleware = createAuthMiddleware(serviceRegistry);
 
-  // Deposit routes
   fastify.post('/deposits', { 
     preHandler: authMiddleware,
     schema: {
@@ -50,7 +49,6 @@ export const registerTransactionRoutes = (
     handler: transactionController.getDepositsForUser,
   });
 
-  // Withdrawal routes
   fastify.post('/withdrawals', {
     preHandler: authMiddleware,
     schema: {
@@ -73,7 +71,6 @@ export const registerTransactionRoutes = (
     handler: transactionController.getWithdrawalsForUser,
   });
 
-  // Combined transactions route
   fastify.get('/transactions/:userId', {
     preHandler: authMiddleware,
     schema: {

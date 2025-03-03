@@ -2,11 +2,11 @@ import { getEpochInfo } from './get-epoch-info';
 import { getInflationRate } from './get-inflation-rate';
 import { computeEpochData } from './compute-epoch';
 import { NetworkDetails } from '../../types';
-import { solanaConnection } from '../../lib/solana';
 import { checkClusterHealth } from './get-cluster-health';
 import { getClusterStats } from './get-cluster-stats';
 import { getSupplyInfo } from './get-supply-info';
 import { getNetworkPerformance } from './get-network-info';
+import { connection } from '../../config';
 
 /**
  * Gets comprehensive network details including epoch info, inflation rate, and computed metrics
@@ -14,7 +14,7 @@ import { getNetworkPerformance } from './get-network-info';
  */
 export const getNetwork = async (): Promise<NetworkDetails> => {
   try {
-    const version = await solanaConnection.getVersion();
+    const version = await connection.getVersion();
     const cluster = process.env.SOLANA_CLUSTER || 'mainnet-beta';
     const [
       epochInfo,
@@ -26,10 +26,10 @@ export const getNetwork = async (): Promise<NetworkDetails> => {
     ] = await Promise.allSettled([
       getEpochInfo(),
       getInflationRate(),
-      getClusterStats(solanaConnection),
-      getSupplyInfo(solanaConnection),
-      getNetworkPerformance(solanaConnection),
-      checkClusterHealth(solanaConnection)
+      getClusterStats(connection),
+      getSupplyInfo(connection),
+      getNetworkPerformance(connection),
+      checkClusterHealth(connection)
     ]);
 
     const response: NetworkDetails = {

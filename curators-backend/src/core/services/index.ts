@@ -1,5 +1,4 @@
 export * from './auth-service';
-export * from './jupiter-service';
 export * from './lst-service';
 export * from './user-service';
 export * from './profitability-service';

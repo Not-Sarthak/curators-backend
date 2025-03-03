@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import { SolanaService } from './solana-service';
-import { JupiterService } from './jupiter-service';
 import { ProfitabilityService } from './profitability-service';
 import { UserService } from './user-service';
 import { TransactionService } from './transaction-service';
@@ -14,7 +13,6 @@ import prisma from '../../lib/prisma';
  */
 export class ServiceRegistry {
   private readonly solanaService: SolanaService;
-  private readonly jupiterService: JupiterService;
   private readonly sanctumService: SanctumService
   private readonly profitabilityService: ProfitabilityService;
   private readonly userService: UserService;
@@ -28,7 +26,6 @@ export class ServiceRegistry {
 
     // Initialize services
     this.solanaService = new SolanaService();
-    this.jupiterService = new JupiterService();
     this.sanctumService = new SanctumService();
     this.profitabilityService = new ProfitabilityService();
     this.userService = new UserService(this.sanctumService);
@@ -51,14 +48,6 @@ export class ServiceRegistry {
    */
   public getSolanaService(): SolanaService {
     return this.solanaService;
-  }
-
-  /**
-   * Gets the Jupiter service
-   * @returns The Jupiter service
-   */
-  public getJupiterService(): JupiterService {
-    return this.jupiterService;
   }
 
   /**

@@ -1,4 +1,4 @@
-import { solanaConnection } from '../../lib/solana';
+import { connection } from '../../config';
 import { EpochInfo } from '../../types';
 
 /**
@@ -7,7 +7,7 @@ import { EpochInfo } from '../../types';
  */
 export const getEpochInfo = async (): Promise<EpochInfo> => {
   try {
-    const epochInfo = await solanaConnection.getEpochInfo();
+    const epochInfo = await connection.getEpochInfo();
 
     return {
       epoch: epochInfo.epoch,

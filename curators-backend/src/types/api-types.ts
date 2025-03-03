@@ -23,23 +23,23 @@ export interface SanctumPool {
 
 export interface SanctumLstMetadata {
   Categories: string;
-  "Feature ID": string;
-  "First bullet point": string;
-  "Launch Date": string;
-  "Main value proposition": string;
-  "Mint address": string;
-  "Mint logo URL": string;
-  "Mint name": string;
-  "Mint symbol": string;
-  "One-liner": string;
+  'Feature ID': string;
+  'First bullet point': string;
+  'Launch Date': string;
+  'Main value proposition': string;
+  'Mint address': string;
+  'Mint logo URL': string;
+  'Mint name': string;
+  'Mint symbol': string;
+  'One-liner': string;
   Program: string;
-  "Sanctum Automated": string;
-  "Second bullet point": string;
+  'Sanctum Automated': string;
+  'Second bullet point': string;
   Status: string;
-  "TG group link": string;
-  "Third bullet point": string;
+  'TG group link': string;
+  'Third bullet point': string;
   Twitter: string;
-  "Vote account": string;
+  'Vote account': string;
   Website: string;
 }
 
@@ -53,13 +53,13 @@ export interface SanctumPriceResponse {
 }
 
 export interface SanctumApyError {
-  code: string; 
-  message: string; 
+  code: string;
+  message: string;
 }
 
 export interface InceptionApyResponse {
-  apys: Record<string, number>; 
-  errs: Record<string, SanctumApyError>; 
+  apys: Record<string, number>;
+  errs: Record<string, SanctumApyError>;
 }
 
 // Jupiter Types
@@ -69,7 +69,7 @@ export interface JupiterSwapQuote {
   outputMint: string;
   outAmount: number;
   otherAmountThreshold: number;
-  swapMode: "ExactIn" | "ExactOut";
+  swapMode: 'ExactIn' | 'ExactOut';
   slippageBps: number;
   platformFee: any | null;
   priceImpactPct: number;
@@ -100,4 +100,38 @@ export interface JupiterSwapRequest {
   quoteResponse: JupiterSwapQuote;
   userPublicKey: string;
   wrapUnwrapSOL: boolean;
+}
+
+// Jito Types
+export interface TipAccountsResponse {
+  ok: boolean;
+  value: string[];
+}
+
+export interface ScheduledLeaderResponse {
+  ok: boolean;
+  value: {
+    currentSlot: number;
+    nextLeaderSlot: number;
+    nextLeaderIdentity: string;
+    nextLeaderRegion: string;
+  };
+}
+
+export interface GlobalJitoTipsResponse {
+  landed25: number;
+  landed50: number;
+  landed75: number;
+  landed95: number;
+  landed99: number;
+  emaWithCap: EmaWithCap;
+  ts: number;
+}
+
+export interface EmaWithCap {
+  landed25: number;
+  landed50: number;
+  landed75: number;
+  landed95: number;
+  landed99: number;
 }

@@ -1,6 +1,8 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../core/services';
 import { CreateDepositRequestDto, CreateWithdrawalRequestDto } from '../../types/dto-types';
+import { executeSwapWithMevProtection } from '../../modules/jupiter-module/execute-swap';
+import { NATIVE_MINT } from '@solana/spl-token';
 
 /**
  * Transaction controller
@@ -17,7 +19,7 @@ export class TransactionController {
   }
 
   /**
-   * Creates a deposit transaction
+   * Creates a deposit transaction and automatically swaps to highest APY LST
    * @param request The request
    * @param reply The reply
    */
@@ -42,19 +44,58 @@ export class TransactionController {
           message: 'You are Not Authorized to Create a Deposit for this Wallet',
         });
       }
-      
+
+      // Create the deposit transaction
       const transactionService = this.serviceRegistry.getTransactionService();
-      
       const transaction = await transactionService.createDeposit(
         request.user.userId,
         walletAddress,
         amountSolNumber,
         transactionHash
       );
-      
-      const processedTransaction = await transactionService.processDeposit(transaction.id);
-      
-      return reply.status(201).send(processedTransaction);
+
+      // Get the highest APY LST
+      const lstService = this.serviceRegistry.getLstService();
+      const highestApyLst = await lstService.getHighestApyLst();
+
+      if (!highestApyLst) {
+        return reply.status(500).send({
+          error: 'Internal Server Error',
+          message: 'No LSTs available for swap',
+        });
+      }
+
+      // Execute swap to highest APY LST
+      try {
+        const swapResult = await executeSwapWithMevProtection(
+          NATIVE_MINT.toBase58(),
+          highestApyLst.mintAddress,
+          amountSolNumber,
+          this.serviceRegistry.getWalletKeypair()
+        );
+
+        // Update transaction with swap details
+        const updatedTransaction = await transactionService.updateDepositWithSwap(
+          transaction.id,
+          swapResult.txHash,
+          highestApyLst.mintAddress,
+          swapResult.usedMevProtection
+        );
+
+        return reply.status(201).send({
+          ...updatedTransaction,
+          swapDetails: {
+            lstSymbol: highestApyLst.symbol,
+            lstApy: highestApyLst.currentApy,
+            transactionHash: swapResult.txHash,
+            usedMevProtection: swapResult.usedMevProtection
+          }
+        });
+      } catch (swapError) {
+        console.error('Error executing swap after deposit:', swapError);
+        // Even if swap fails, return successful deposit
+        return reply.status(201).send(transaction);
+      }
     } catch (error) {
       console.error('Error Creating Deposit:', error);
       return reply.status(500).send({
