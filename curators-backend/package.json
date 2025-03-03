@@ -35,6 +35,7 @@
     "decimal.js": "^10.5.0",
     "dotenv": "^16.4.7",
     "fastify": "^4.20.0",
+    "jito-ts": "^4.2.0",
     "jsonwebtoken": "^9.0.1",
     "pino": "^8.14.1",
     "pino-pretty": "^10.0.1",

@@ -84,7 +84,11 @@ export class TransactionService {
       data: {
         status: TransactionStatus.COMPLETED,
         confirmationCount: 32,
-        lstMintAddress,
+        lstToken: {
+          connect: {
+            mintAddress: lstMintAddress
+          }
+        },
         swapTransactionHash: swapTxHash,
         usedMevProtection,
       },

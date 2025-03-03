@@ -146,6 +146,7 @@ model Transaction {
   
   transactionType     TransactionType
   transactionHash     String?          @unique @map("transaction_hash")
+  swapTransactionHash String?          @unique @map("swap_transaction_hash")
   walletAddress       String           @map("wallet_address")
   
   amountSol           Decimal          @map("amount_sol") @db.Decimal(18, 9)
@@ -163,6 +164,7 @@ model Transaction {
   errorMessage        String?          @map("error_message")
   confirmationCount   Int              @default(0) @map("confirmation_count")
   retryCount          Int              @default(0) @map("retry_count")
+  usedMevProtection   Boolean?         @map("used_mev_protection")
   
   createdAt           DateTime         @default(now()) @map("created_at")
   updatedAt           DateTime         @updatedAt @map("updated_at")

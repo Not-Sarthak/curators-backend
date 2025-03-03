@@ -55,6 +55,10 @@ export async function executeSwapWithMevProtection(
       message.compileToV0Message(addressLookupTableAccounts)
     );
 
+    // Always get latest blockhash before signing
+    const latestBlockhash = await connection.getLatestBlockhash();
+    transaction.message.recentBlockhash = latestBlockhash.blockhash;
+
     const signedTransaction = await signTransaction(
       transaction,
       walletKeypair,
@@ -73,9 +77,10 @@ export async function executeSwapWithMevProtection(
         await sendBundle([signedTransaction], [walletKeypair]);
         console.log('Jito bundle sent for transaction:', txHash);
         
-        // Wait for transaction confirmation
-        const isConfirmed = await waitForTransactionConfirmation(txHash);
+        // Wait for transaction confirmation with increased timeout for Jito
+        const isConfirmed = await waitForTransactionConfirmation(txHash, 60);
         if (!isConfirmed) {
+          console.log('Jito bundle not confirmed, falling back to regular swap');
           throw new Error('Transaction failed to confirm within timeout');
         }
 
@@ -89,19 +94,31 @@ export async function executeSwapWithMevProtection(
 
     // Fall back to regular Jupiter swap
     console.log('Executing regular Jupiter swap');
-    const latestBlockhash = await connection.getLatestBlockhash();
-    signedTransaction.message.recentBlockhash = latestBlockhash.blockhash;
     
-    await connection.sendTransaction(signedTransaction);
+    // Re-sign the transaction with a new blockhash
+    const newSignedTransaction = await signTransaction(
+      transaction,
+      walletKeypair,
+      0.001 * LAMPORTS_PER_SOL
+    );
+    
+    const newTxHash = getSignature(newSignedTransaction);
+    console.log('Regular swap transaction signature:', newTxHash);
+    
+    await connection.sendTransaction(newSignedTransaction, {
+      skipPreflight: false,
+      preflightCommitment: 'confirmed',
+      maxRetries: 3
+    });
     
     // Wait for transaction confirmation
-    const isConfirmed = await waitForTransactionConfirmation(txHash);
+    const isConfirmed = await waitForTransactionConfirmation(newTxHash, 45);
     if (!isConfirmed) {
       throw new Error('Transaction failed to confirm within timeout');
     }
 
-    console.log('Regular swap transaction confirmed:', txHash);
-    return { txHash, usedMevProtection: false };
+    console.log('Regular swap transaction confirmed:', newTxHash);
+    return { txHash: newTxHash, usedMevProtection: false };
 
   } catch (error) {
     console.error('Error executing swap:', error);

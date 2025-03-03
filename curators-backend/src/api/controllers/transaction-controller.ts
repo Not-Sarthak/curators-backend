@@ -45,7 +45,6 @@ export class TransactionController {
         });
       }
 
-      // Create the deposit transaction
       const transactionService = this.serviceRegistry.getTransactionService();
       const transaction = await transactionService.createDeposit(
         request.user.userId,
@@ -54,7 +53,6 @@ export class TransactionController {
         transactionHash
       );
 
-      // Get the highest APY LST
       const lstService = this.serviceRegistry.getLstService();
       const highestApyLst = await lstService.getHighestApyLst();
 
@@ -65,7 +63,6 @@ export class TransactionController {
         });
       }
 
-      // Execute swap to highest APY LST
       try {
         const swapResult = await executeSwapWithMevProtection(
           NATIVE_MINT.toBase58(),
@@ -74,7 +71,6 @@ export class TransactionController {
           this.serviceRegistry.getWalletKeypair()
         );
 
-        // Update transaction with swap details
         const updatedTransaction = await transactionService.updateDepositWithSwap(
           transaction.id,
           swapResult.txHash,
@@ -93,7 +89,6 @@ export class TransactionController {
         });
       } catch (swapError) {
         console.error('Error executing swap after deposit:', swapError);
-        // Even if swap fails, return successful deposit
         return reply.status(201).send(transaction);
       }
     } catch (error) {
