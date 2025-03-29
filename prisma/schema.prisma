@@ -1,0 +1,297 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LstStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+enum DepositStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum WithdrawalType {
+  SOL
+  LST
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  SWAP
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CONFIRMED
+  FAILED
+}
+
+enum SwapStatus {
+  PENDING
+  SIMULATING
+  EXECUTING
+  COMPLETED
+  FAILED
+}
+
+enum SwapRouteSource {
+  JUPITER
+  SANCTUM
+}
+
+model User {
+  id                   String        @id @default(uuid())
+  walletAddress        String        @unique @map("wallet_address")
+  
+  totalDepositsSol     Decimal       @default(0) @map("total_deposits_sol") @db.Decimal(18, 9)
+  totalWithdrawalsSol  Decimal       @default(0) @map("total_withdrawals_sol") @db.Decimal(18, 9)
+  currentDepositSol    Decimal       @default(0) @map("current_deposit_sol") @db.Decimal(18, 9)
+  
+  totalValueSol        Decimal       @default(0) @map("total_value_sol") @db.Decimal(18, 9)
+  unrealizedProfitSol  Decimal       @default(0) @map("unrealized_profit_sol") @db.Decimal(18, 9)
+  realizedProfitSol    Decimal       @default(0) @map("realized_profit_sol") @db.Decimal(18, 9)
+  totalProfitSol       Decimal       @default(0) @map("total_profit_sol") @db.Decimal(18, 9)
+  
+  profitPercentage     Decimal       @default(0) @map("profit_percentage") @db.Decimal(6, 2)
+  
+  status               LstStatus     @default(ACTIVE)
+  
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+  
+  holdings             UserHolding[]
+  transactions         Transaction[]
+  swaps                Swap[]
+  explorerRecords      Explorer[]
+  epochProfits         EpochProfit[]
+
+  @@map("users")
+}
+
+model LstToken {
+  mintAddress        String        @id @map("mint_address")
+  symbol             String        @unique
+  name               String
+  imageUrl           String?       @map("image_url")
+  protocolName       String        @map("protocol_name")
+  protocolWebsite    String?       @map("protocol_website")
+  
+  currentApy         Decimal?      @map("current_apy") @db.Decimal(18, 9)
+  currentPriceSol    Decimal?      @map("current_price_sol") @db.Decimal(18, 9)
+  totalLiquiditySol  Decimal?      @map("total_liquidity_sol") @db.Decimal(18, 9)
+  marketCapSol       Decimal?      @map("market_cap_sol") @db.Decimal(18, 9)
+  
+  avgApyOverHistory  Json?         @map("avg_apy_over_history")
+  
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+
+  @@index([currentApy], name: "idx_lst_tokens_current_apy")
+
+  // Relations
+  userHoldings       UserHolding[]
+  transactions       Transaction[]
+  explorerRecords    Explorer[]
+  bestPerforming     EpochProfit[] @relation("BestPerformingLst")
+  worstPerforming    EpochProfit[] @relation("WorstPerformingLst")
+  sourceSwaps        Swap[]        @relation("SourceLst")
+  destinationSwaps   Swap[]        @relation("DestinationLst")
+
+  @@map("lst_tokens")
+}
+
+
+model UserHolding {
+  id                  String    @id @default(uuid())
+  userId              String    @map("user_id")
+  lstMintAddress      String    @map("lst_mint_address")
+  amount              Decimal   @db.Decimal(18, 9)
+  valueInSol          Decimal   @map("value_in_sol") @db.Decimal(18, 9)
+  entryPriceSol       Decimal   @map("entry_price_sol") @db.Decimal(18, 9)
+  unrealizedProfitSol Decimal   @default(0) @map("unrealized_profit_sol") @db.Decimal(18, 9)
+  
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lstToken            LstToken  @relation(fields: [lstMintAddress], references: [mintAddress])
+
+  @@unique([userId, lstMintAddress], name: "unique_user_lst")
+  @@map("user_holdings")
+}
+
+model Transaction {
+  id                  String           @id @default(uuid())
+  userId              String           @map("user_id")
+  
+  transactionType     TransactionType
+  transactionHash     String?          @unique @map("transaction_hash")
+  swapTransactionHash String?          @unique @map("swap_transaction_hash")
+  walletAddress       String           @map("wallet_address")
+  
+  amountSol           Decimal          @map("amount_sol") @db.Decimal(18, 9)
+  networkFeeSol       Decimal?         @map("network_fee_sol") @db.Decimal(18, 9)
+  
+  actualAmountSol     Decimal?         @map("actual_amount_sol") @db.Decimal(18, 9)
+  conversionFeeSol    Decimal?         @map("conversion_fee_sol") @db.Decimal(18, 9)
+  withdrawalType      WithdrawalType?
+  
+  lstMintAddress      String?          @map("lst_mint_address")
+  lstAmount           Decimal?         @map("lst_amount") @db.Decimal(18, 9)
+  conversionPriceSol  Decimal?         @map("conversion_price_sol") @db.Decimal(18, 9)
+  
+  status              TransactionStatus @default(PENDING)
+  errorMessage        String?          @map("error_message")
+  confirmationCount   Int              @default(0) @map("confirmation_count")
+  retryCount          Int              @default(0) @map("retry_count")
+  usedMevProtection   Boolean?         @map("used_mev_protection")
+  
+  createdAt           DateTime         @default(now()) @map("created_at")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
+  
+  // Relations
+  user                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lstToken            LstToken?        @relation(fields: [lstMintAddress], references: [mintAddress])
+  explorerRecords     Explorer[]
+
+  @@index([userId, status], name: "idx_transactions_user_status")
+  @@index([transactionHash], name: "idx_transactions_hash")
+  @@index([createdAt], name: "idx_transactions_created")
+  @@index([transactionType], name: "idx_transactions_type")
+  @@map("transactions")
+}
+
+model Explorer {
+  id                      String            @id @default(uuid())
+  userId                  String            @map("user_id")
+  
+  transactionType         TransactionType
+  transactionHash         String?           @unique @map("transaction_hash")
+  
+  transactionId           String?           @map("transaction_id")
+  swapId                  String?           @map("swap_id")
+  
+  amountSol               Decimal           @map("amount_sol") @db.Decimal(18, 9)
+  feeSol                  Decimal           @map("fee_sol") @db.Decimal(18, 9)
+  
+  lstMintAddress          String?           @map("lst_mint_address")
+  lstAmount               Decimal?          @map("lst_amount") @db.Decimal(18, 9)
+  lstPriceSol             Decimal?          @map("lst_price_sol") @db.Decimal(18, 9)
+  
+  portfolioValueBeforeSol Decimal           @map("portfolio_value_before_sol") @db.Decimal(18, 9)
+  portfolioValueAfterSol  Decimal           @map("portfolio_value_after_sol") @db.Decimal(18, 9)
+  profitImpactSol         Decimal?          @map("profit_impact_sol") @db.Decimal(18, 9)
+  
+  status                  TransactionStatus
+  errorMessage            String?           @map("error_message")
+  confirmationCount       Int               @default(0) @map("confirmation_count")
+  
+  blockNumber             BigInt?           @map("block_number")
+  blockTime               BigInt?           @map("block_time")
+  
+  createdAt               DateTime          @default(now()) @map("created_at")
+  updatedAt               DateTime          @updatedAt @map("updated_at")
+  
+  // Relations
+  user                    User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lstToken                LstToken?         @relation(fields: [lstMintAddress], references: [mintAddress])
+  transaction             Transaction?      @relation(fields: [transactionId], references: [id])
+  swap                    Swap?             @relation(fields: [swapId], references: [id])
+
+  @@map("explorer")
+}
+
+model EpochProfit {
+  id                 String    @id @default(uuid())
+  userId             String    @map("user_id")
+  
+  startValueSol      Decimal   @map("start_value_sol") @db.Decimal(18, 9)
+  endValueSol        Decimal   @map("end_value_sol") @db.Decimal(18, 9)
+  epochNumber        Int       @map("epoch_number")
+  
+  totalProfitSol     Decimal   @map("total_profit_sol") @db.Decimal(18, 9)
+  profitPercentage   Decimal   @map("profit_percentage") @db.Decimal(6, 2)
+  
+  bestPerformingLst  String?   @map("best_performing_lst")
+  bestLstApy         Decimal?  @map("best_lst_apy") @db.Decimal(6, 2)
+  worstPerformingLst String?   @map("worst_performing_lst")
+  worstLstApy        Decimal?  @map("worst_lst_apy") @db.Decimal(6, 2)
+  
+  epochStartTime     DateTime  @map("epoch_start_time")
+  epochEndTime       DateTime  @map("epoch_end_time")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bestLst            LstToken? @relation("BestPerformingLst", fields: [bestPerformingLst], references: [mintAddress])
+  worstLst           LstToken? @relation("WorstPerformingLst", fields: [worstPerformingLst], references: [mintAddress])
+
+  @@map("epoch_profits")
+}
+
+model Swap {
+  id                   String          @id @default(uuid())
+  userId               String          @map("user_id")
+  
+  transactionHash      String?         @unique @map("transaction_hash")
+  
+  sourceLstMint        String          @map("source_lst_mint")
+  sourceAmount         Decimal         @map("source_amount") @db.Decimal(18, 9)
+  sourcePriceSol       Decimal         @map("source_price_sol") @db.Decimal(18, 9)
+  sourceApy            Decimal         @map("source_apy") @db.Decimal(6, 2)
+  
+  destinationLstMint   String          @map("destination_lst_mint")
+  destinationAmount    Decimal?        @map("destination_amount") @db.Decimal(18, 9)
+  destinationPriceSol  Decimal         @map("destination_price_sol") @db.Decimal(18, 9)
+  destinationApy       Decimal         @map("destination_apy") @db.Decimal(6, 2)
+  
+  routeSource          SwapRouteSource
+  routeDetails         Json            @map("route_details")
+  quotedOutputAmount   Decimal         @map("quoted_output_amount") @db.Decimal(18, 9)
+  actualOutputAmount   Decimal?        @map("actual_output_amount") @db.Decimal(18, 9)
+  
+  networkFeeSol        Decimal         @map("network_fee_sol") @db.Decimal(18, 9)
+  protocolFeeSol       Decimal         @map("protocol_fee_sol") @db.Decimal(18, 9)
+  slippageBps          Int             @map("slippage_bps")
+  priceImpactPercent   Decimal         @map("price_impact_percent") @db.Decimal(6, 2)
+  
+  expectedProfitSol    Decimal         @map("expected_profit_sol") @db.Decimal(18, 9)
+  actualProfitSol      Decimal?        @map("actual_profit_sol") @db.Decimal(18, 9)
+  
+  status               SwapStatus      @default(PENDING)
+  errorMessage         String?         @map("error_message")
+  simulationSuccessful Boolean?        @map("simulation_successful")
+  confirmationCount    Int             @default(0) @map("confirmation_count")
+  
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @updatedAt @map("updated_at")
+  
+  // Relations
+  user                 User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceLst            LstToken        @relation("SourceLst", fields: [sourceLstMint], references: [mintAddress])
+  destinationLst       LstToken        @relation("DestinationLst", fields: [destinationLstMint], references: [mintAddress])
+  transactions         Explorer[]
+
+  @@map("swaps")
+}

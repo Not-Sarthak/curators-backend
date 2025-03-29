@@ -1,1 +1,0 @@
-psql -U sarthak -h localhost -p 5432 solana_lst

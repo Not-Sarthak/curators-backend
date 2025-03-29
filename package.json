@@ -1,0 +1,62 @@
+{
+  "name": "solana-lst-yield-maximizer",
+  "version": "1.0.0",
+  "description": "API for maximizing yield on Solana LSTs",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "test": "jest"
+  },
+  "keywords": [
+    "solana",
+    "lst",
+    "yield",
+    "staking",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@fastify/cors": "^8.3.0",
+    "@fastify/helmet": "^11.0.0",
+    "@prisma/client": "^5.0.0",
+    "@solana/spl-token": "^0.4.12",
+    "@solana/web3.js": "^1.98.0",
+    "axios": "^1.4.0",
+    "bs58": "^6.0.0",
+    "cron": "^4.1.0",
+    "decimal.js": "^10.5.0",
+    "dotenv": "^16.4.7",
+    "fastify": "^4.20.0",
+    "jito-ts": "^4.2.0",
+    "jsonwebtoken": "^9.0.1",
+    "pino": "^8.14.1",
+    "pino-pretty": "^10.0.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/cron": "^2.0.1",
+    "@types/jest": "^29.5.3",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/node": "^20.4.2",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.44.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "jest": "^29.6.1",
+    "prettier": "^3.0.0",
+    "prisma": "^5.0.0",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.1.6"
+  }
+}
