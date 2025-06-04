@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { ServiceRegistry } from '../../core/services';
+import { ServiceRegistry } from '../../services';
 import { createAuthMiddleware } from '../middlewares/auth-middleware';
 import { getUserPortfolio } from '../../modules/database-module/portfolio/get-user-portfolio';
 import { getUserProfitHistory } from '../../modules/database-module/portfolio/get-user-profit';

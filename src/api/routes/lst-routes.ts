@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { ServiceRegistry } from "../../core/services";
+import { ServiceRegistry } from "../../services";
 import {
   lstListResponseSchema,
   lstDetailResponseSchema,

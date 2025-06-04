@@ -1,9 +1,9 @@
-import { getUserPortfolio } from "../../modules/database-module/portfolio/get-user-portfolio";
-import { getUserProfitHistory } from "../../modules/database-module/portfolio/get-user-profit";
-import { getUserTransactions } from "../../modules/database-module/portfolio/get-user-transactions";
-import { updatePortfolioAfterDeposit } from "../../modules/database-module/portfolio/update-portfolio-after-deposit";
-import { updatePortfolioAfterWithdrawal } from "../../modules/database-module/portfolio/update-portfolio-after-withdrawal";
-import { updatePortfolioAfterSwap } from "../../modules/database-module/portfolio/update-portfolio-after-swap";
+import { getUserPortfolio } from "../modules/database-module/portfolio/get-user-portfolio";
+import { getUserProfitHistory } from "../modules/database-module/portfolio/get-user-profit";
+import { getUserTransactions } from "../modules/database-module/portfolio/get-user-transactions";
+import { updatePortfolioAfterDeposit } from "../modules/database-module/portfolio/update-portfolio-after-deposit";
+import { updatePortfolioAfterWithdrawal } from "../modules/database-module/portfolio/update-portfolio-after-withdrawal";
+import { updatePortfolioAfterSwap } from "../modules/database-module/portfolio/update-portfolio-after-swap";
 import { SanctumService } from "./sanctum-service";
 
 export class UserService {

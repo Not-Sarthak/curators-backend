@@ -1,9 +1,9 @@
-import { fetchAllLsts } from "../../modules/sanctum-module/get-all-lsts";
-import { fetchLstMetadata } from "../../modules/sanctum-module/get-lst-meta";
-import { fetchLatestApy } from "../../modules/sanctum-module/get-latest-apy";
-import { fetchLstPriceInSol } from "../../modules/sanctum-module/get-lst-sol-price";
-import { SanctumLstMetadata, SanctumLst, SanctumPriceResponse, InceptionApyResponse, SanctumApyResponse } from "../../types/api-types";
-import { fetchInceptionApy } from "../../modules/sanctum-module/get-inception-apy";
+import { fetchAllLsts } from "../modules/sanctum-module/get-all-lsts";
+import { fetchLstMetadata } from "../modules/sanctum-module/get-lst-meta";
+import { fetchLatestApy } from "../modules/sanctum-module/get-latest-apy";
+import { fetchLstPriceInSol } from "../modules/sanctum-module/get-lst-sol-price";
+import { SanctumLstMetadata, SanctumLst, SanctumPriceResponse, InceptionApyResponse, SanctumApyResponse } from "../types/api-types";
+import { fetchInceptionApy } from "../modules/sanctum-module/get-inception-apy";
 
 export class SanctumService {
   public async getAllLsts(): Promise<SanctumLst[]> {

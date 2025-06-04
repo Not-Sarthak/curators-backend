@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { AuthController } from '../controllers';
-import { ServiceRegistry } from '../../core/services';
+import { ServiceRegistry } from '../../services';
 import { 
   signInBodySchema, 
   verifyTokenBodySchema, 

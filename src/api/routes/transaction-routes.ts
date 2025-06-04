@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { TransactionController } from '../controllers';
-import { ServiceRegistry } from '../../core/services';
+import { ServiceRegistry } from '../../services';
 import { createAuthMiddleware } from '../middlewares';
 import { 
   createDepositBodySchema, 

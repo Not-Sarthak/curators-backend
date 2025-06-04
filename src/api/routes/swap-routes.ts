@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { ServiceRegistry } from '../../core/services';
+import { ServiceRegistry } from '../../services';
 import { createAuthMiddleware } from '../middlewares';
 import { SwapController } from '../controllers';
 import { swapQuoteSchema, swapExecuteSchema, swapRoutesSchema } from '../../lib/schema/swap-schema';

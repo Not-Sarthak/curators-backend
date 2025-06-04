@@ -26,7 +26,7 @@ export const registerNetworkRoutes = (
     },
     handler: async (request, reply) => {
       try {
-        const result = await networkController.getNetworkDetails(request, reply);
+        const result = await networkController.getNetworkDetails();
         console.log("Result:", JSON.stringify(result, null, 2));
         await reply.status(200).send(result);
       } catch (error) {

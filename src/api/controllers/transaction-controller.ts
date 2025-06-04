@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { ServiceRegistry } from '../../core/services';
+import { ServiceRegistry } from '../../services';
 import { CreateDepositRequestDto, CreateWithdrawalRequestDto } from '../../types/dto-types';
 import { executeSwapWithMevProtection } from '../../modules/jupiter-module/execute-swap';
 import { NATIVE_MINT } from '@solana/spl-token';
@@ -29,7 +29,7 @@ export class TransactionController {
   ) => {
     try {
       const { walletAddress, amountSol, transactionHash } = request.body;
-      
+
       const amountSolNumber = Number(amountSol);
       if (isNaN(amountSolNumber)) {
         return reply.status(400).send({
@@ -37,7 +37,7 @@ export class TransactionController {
           message: 'Invalid Amount Provided',
         });
       }
-      
+
       if (request.user?.walletAddress !== walletAddress) {
         return reply.status(403).send({
           error: 'Forbidden',
@@ -84,8 +84,8 @@ export class TransactionController {
             lstSymbol: highestApyLst.symbol,
             lstApy: highestApyLst.currentApy,
             transactionHash: swapResult.txHash,
-            usedMevProtection: swapResult.usedMevProtection
-          }
+            usedMevProtection: swapResult.usedMevProtection,
+          },
         });
       } catch (swapError) {
         console.error('Error executing swap after deposit:', swapError);
@@ -111,18 +111,18 @@ export class TransactionController {
   ) => {
     try {
       const { userId } = request.params;
-      
+
       if (request.user?.userId !== userId) {
         return reply.status(403).send({
           error: 'Forbidden',
           message: 'You are not authorized to access these deposits',
         });
       }
-      
+
       const transactionService = this.serviceRegistry.getTransactionService();
-      
+
       const result = await transactionService.getDepositsForUser(userId);
-      
+
       return reply.status(200).send(result);
     } catch (error) {
       console.error('Error getting deposits for user:', error);
@@ -144,14 +144,14 @@ export class TransactionController {
   ) => {
     try {
       const { walletAddress, requestedAmountSol, withdrawalType, lstMintAddress } = request.body;
-      
+
       if (request.user?.walletAddress !== walletAddress) {
         return reply.status(403).send({
           error: 'Forbidden',
           message: 'You are not authorized to create a withdrawal for this wallet',
         });
       }
-      
+
       const amountSolNumber = Number(requestedAmountSol);
       if (isNaN(amountSolNumber) || amountSolNumber <= 0) {
         return reply.status(400).send({
@@ -159,9 +159,9 @@ export class TransactionController {
           message: 'Invalid withdrawal amount provided',
         });
       }
-      
+
       const transactionService = this.serviceRegistry.getTransactionService();
-      
+
       const transaction = await transactionService.createWithdrawal(
         request.user.userId,
         walletAddress,
@@ -169,9 +169,9 @@ export class TransactionController {
         withdrawalType,
         lstMintAddress
       );
-      
+
       const processedTransaction = await transactionService.processWithdrawal(transaction.id);
-      
+
       return reply.status(201).send(processedTransaction);
     } catch (error) {
       console.error('Error creating withdrawal:', error);
@@ -193,18 +193,18 @@ export class TransactionController {
   ) => {
     try {
       const { userId } = request.params;
-      
+
       if (request.user?.userId !== userId) {
         return reply.status(403).send({
           error: 'Forbidden',
           message: 'You are not authorized to access these withdrawals',
         });
       }
-      
+
       const transactionService = this.serviceRegistry.getTransactionService();
-      
+
       const withdrawals = await transactionService.getWithdrawalsForUser(userId);
-      
+
       return reply.status(200).send(withdrawals);
     } catch (error) {
       console.error('Error getting withdrawals for user:', error);
@@ -226,18 +226,18 @@ export class TransactionController {
   ) => {
     try {
       const { userId } = request.params;
-      
+
       if (request.user?.userId !== userId) {
         return reply.status(403).send({
           error: 'Forbidden',
           message: 'You are not authorized to access these transactions',
         });
       }
-      
+
       const transactionService = this.serviceRegistry.getTransactionService();
-      
+
       const result = await transactionService.getTransactionsForUser(userId);
-      
+
       return reply.status(200).send(result);
     } catch (error) {
       console.error('Error getting transactions for user:', error);
@@ -247,4 +247,4 @@ export class TransactionController {
       });
     }
   };
-} 
+}

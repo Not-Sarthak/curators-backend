@@ -3,8 +3,7 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import { PrismaClient } from '@prisma/client';
 import { registerRoutes } from './api/routes';
-import { errorHandler } from './api/middlewares';
-import { ServiceRegistry } from './core/services';
+import { ServiceRegistry } from './services';
 import { config } from './config';
 
 export const createApp = async (): Promise<FastifyInstance> => {
@@ -39,8 +38,6 @@ export const createApp = async (): Promise<FastifyInstance> => {
   });
   const prisma = new PrismaClient();
   const serviceRegistry = new ServiceRegistry();
-
-  app.setErrorHandler(errorHandler);
 
   registerRoutes(app, serviceRegistry);
 

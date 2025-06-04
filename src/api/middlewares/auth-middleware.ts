@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { ServiceRegistry } from '../../core/services';
+import { ServiceRegistry } from '../../services';
 
 /**
  * Authentication middleware
@@ -11,27 +11,23 @@ export const createAuthMiddleware = (serviceRegistry: ServiceRegistry) => {
 
   return async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      // Get the authorization header
       const authHeader = request.headers.authorization;
       if (!authHeader) {
-        return reply.status(401).send({ error: 'Authorization header is required' });
+        return reply.status(401).send({ error: 'Authorization Header' });
       }
 
-      // Check if the header is in the correct format
       if (!authHeader.startsWith('Bearer ')) {
-        return reply.status(401).send({ error: 'Invalid authorization header format' });
+        return reply.status(401).send({ error: 'Invalid Auth Header Format' });
       }
 
-      // Extract the token
+      // Extract the Token
       const token = authHeader.substring(7);
       if (!token) {
-        return reply.status(401).send({ error: 'Token is required' });
+        return reply.status(401).send({ error: 'Token is Required' });
       }
 
-      // Verify the token
       const decoded = authService.verifyToken(token);
 
-      // Add the user ID to the request
       request.user = {
         userId: decoded.userId,
         walletAddress: decoded.walletAddress,
@@ -42,7 +38,6 @@ export const createAuthMiddleware = (serviceRegistry: ServiceRegistry) => {
   };
 };
 
-// Extend the FastifyRequest interface to include the user property
 declare module 'fastify' {
   interface FastifyRequest {
     user?: {

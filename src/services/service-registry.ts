@@ -6,9 +6,9 @@ import { TransactionService } from './transaction-service';
 import { LstService } from './lst-service';
 import { AuthService } from './auth-service';
 import { SanctumService } from './sanctum-service';
-import prisma from '../../lib/prisma';
+import prisma from '../lib/prisma';
 import { Keypair } from '@solana/web3.js';
-import { parseSolanaPrivateKey } from '../../lib/utils';
+import { parseSolanaPrivateKey } from '../lib/utils';
 
 /**
  * Registry for all services

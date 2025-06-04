@@ -1,12 +1,12 @@
-import { createDeposit } from '../../modules/database-module/transfers/create-deposit';
-import { processDeposit } from '../../modules/database-module/transfers/process-deposit';
-import { createWithdrawal } from '../../modules/database-module/transfers/create-withdrawal';
-import { processWithdrawal } from '../../modules/database-module/transfers/process-withdrawal';
-import { getDepositsForUser } from '../../modules/database-module/transfers/get-user-deposits';
-import { getWithdrawalsForUser } from '../../modules/database-module/transfers/get-user-withdrawals';
-import { getTransactionsForUser } from '../../modules/database-module/transfers/get-user-transactions';
+import { createDeposit } from '../modules/database-module/transfers/create-deposit';
+import { processDeposit } from '../modules/database-module/transfers/process-deposit';
+import { createWithdrawal } from '../modules/database-module/transfers/create-withdrawal';
+import { processWithdrawal } from '../modules/database-module/transfers/process-withdrawal';
+import { getDepositsForUser } from '../modules/database-module/transfers/get-user-deposits';
+import { getWithdrawalsForUser } from '../modules/database-module/transfers/get-user-withdrawals';
+import { getTransactionsForUser } from '../modules/database-module/transfers/get-user-transactions';
 import { WithdrawalType, TransactionStatus } from '@prisma/client';
-import prisma from '../../lib/prisma';
+import prisma from '../lib/prisma';
 /**
  * Service for managing transactions (deposits and withdrawals)
  */

@@ -1,17 +1,17 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { ServiceRegistry } from '../../core/services';
+import { ServiceRegistry } from '../../services';
 import { SignInRequestDto, VerifyTokenRequestDto } from '../../types/auth-types';
 
 /**
  * Authentication controller
- */
+*/
 export class AuthController {
   private readonly serviceRegistry: ServiceRegistry;
 
   /**
    * Creates a new AuthController instance
    * @param serviceRegistry The service registry
-   */
+  */
   constructor(serviceRegistry: ServiceRegistry) {
     this.serviceRegistry = serviceRegistry;
   }
@@ -27,14 +27,9 @@ export class AuthController {
   ) => {
     try {
       const { walletAddress, signature } = request.body;
-      
-      // Get the auth service
       const authService = this.serviceRegistry.getAuthService();
-      
-      // Sign in the user
       const result = await authService.signIn(walletAddress, signature);
       
-      // Return the result
       return reply.status(200).send({
         user: {
           id: result.user.id,
@@ -44,7 +39,7 @@ export class AuthController {
         token: result.token,
       });
     } catch (error) {
-      console.error('Error signing in:', error);
+      console.error('Error Signing In:', error);
       return reply.status(400).send({
         error: 'Authentication Error',
         message: error instanceof Error ? error.message : 'Failed to sign in',
@@ -63,17 +58,10 @@ export class AuthController {
   ) => {
     try {
       const { token } = request.body;
-      
-      // Get the auth service
       const authService = this.serviceRegistry.getAuthService();
-      
-      // Verify the token
       const decoded = authService.verifyToken(token);
-      
-      // Get the user
       const user = await authService.getUserById(decoded.userId);
       
-      // Return the result
       return reply.status(200).send({
         user: {
           id: user.id,
@@ -83,10 +71,10 @@ export class AuthController {
         token,
       });
     } catch (error) {
-      console.error('Error verifying token:', error);
+      console.error('Error Verifying Token:', error);
       return reply.status(401).send({
         error: 'Authentication Error',
-        message: error instanceof Error ? error.message : 'Failed to verify token',
+        message: error instanceof Error ? error.message : 'Failed to Verify Token',
       });
     }
   };

@@ -1,8 +1,8 @@
-import { getAllLstsFromDb } from '../../modules/database-module/lst/get-all-lsts-from-database';
-import { LstToken } from '../../types/database-types';
-import { fetchAllLsts } from '../../modules/sanctum-module/get-all-lsts';
-import { fetchLatestApy } from '../../modules/sanctum-module/get-latest-apy';
-import prisma from '../../lib/prisma';
+import { getAllLstsFromDb } from '../modules/database-module/lst/get-all-lsts-from-database';
+import { LstToken } from '../types/database-types';
+import { fetchAllLsts } from '../modules/sanctum-module/get-all-lsts';
+import { fetchLatestApy } from '../modules/sanctum-module/get-latest-apy';
+import prisma from '../lib/prisma';
 import { Prisma } from '@prisma/client';
 
 export class LstService {

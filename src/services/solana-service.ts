@@ -1,7 +1,7 @@
-import { computeEpochData } from '../../modules/solana-module/compute-epoch';
-import { getEpochInfo } from '../../modules/solana-module/get-epoch-info';
-import { getInflationRate } from '../../modules/solana-module/get-inflation-rate';
-import { ComputedEpochData } from '../../types';
+import { computeEpochData } from '../modules/solana-module/compute-epoch';
+import { getEpochInfo } from '../modules/solana-module/get-epoch-info';
+import { getInflationRate } from '../modules/solana-module/get-inflation-rate';
+import { ComputedEpochData } from '../types';
 
 /**
  * Service for interacting with the Solana blockchain

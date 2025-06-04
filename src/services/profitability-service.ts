@@ -1,7 +1,6 @@
-import { EpochInfo } from '../../types';
+import { EpochInfo } from '../types';
 
-
-// Implement Algorithm here
+// Implement Algorithm Here
 
 export class ProfitabilityService {
   private readonly MIN_APY_IMPROVEMENT_THRESHOLD = 2.0;
